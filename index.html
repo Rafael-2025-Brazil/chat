@@ -4,25 +4,47 @@
   <meta charset="UTF-8" />
   <title>Chat Simples</title>
   <style>
-    body { font-family: Arial; margin: 0; padding: 20px; background: #111; color: white; }
-    #name-page, #chat-page { display: none; }
-    input, button { padding: 10px; margin: 5px; }
-    #chat-box { background: #222; height: 300px; overflow-y: auto; border: 1px solid #444; padding: 10px; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: white;
+      padding: 20px;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+    }
+
+    #chat-box {
+      background: #222;
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #444;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    #name-error {
+      color: red;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Página de nome -->
   <div id="name-page">
     <h2>Digite seu nome</h2>
-    <input type="text" id="username" />
+    <input type="text" id="username" placeholder="Seu nome" />
     <button onclick="confirmName()">Entrar no Chat</button>
-    <p id="name-error" style="color: red;"></p>
+    <p id="name-error"></p>
   </div>
 
-  <div id="chat-page">
-    <h2>Bem-vindo, <span id="user-label"></span></h2>
+  <!-- Página do chat -->
+  <div id="chat-page" style="display: none;">
+    <h2>Bem-vindo, <span id="user-label"></span>!</h2>
     <div id="chat-box"></div>
-    <input type="text" id="mensagem" placeholder="Digite sua mensagem" />
+    <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
     <button onclick="enviarMensagem()">Enviar</button>
   </div>
 
