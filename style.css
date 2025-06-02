@@ -1,0 +1,24 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background: #111;
+  color: #eee;
+}
+input, button {
+  padding: 10px;
+  margin: 5px 0;
+  width: 100%;
+}
+#chat-box {
+  border: 1px solid #444;
+  padding: 10px;
+  height: 300px;
+  overflow-y: scroll;
+  background: #222;
+  margin-bottom: 10px;
+}
+#admin-panel {
+  margin-top: 20px;
+  border-top: 1px solid #666;
+  padding-top: 10px;
+}

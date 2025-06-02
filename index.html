@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat Simples</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="login-page">
+    <h2>Login</h2>
+    <input type="password" id="senha" placeholder="Digite a senha" />
+    <button onclick="fazerLogin()">Entrar</button>
+    <p id="login-error"></p>
+  </div>
+
+  <div id="name-page" style="display:none;">
+    <h2>Escolha seu nome</h2>
+    <input type="text" id="username" placeholder="Seu nome" />
+    <button onclick="confirmName()">Entrar no chat</button>
+    <p id="name-error"></p>
+  </div>
+
+  <div id="chat-page" style="display:none;">
+    <h2>Bem-vindo, <span id="user-label"></span></h2>
+    <div id="chat-box"></div>
+    <input type="text" id="mensagem" placeholder="Digite sua mensagem" />
+    <button onclick="enviarMensagem()">Enviar</button>
+
+    <div id="admin-panel" style="display:none;">
+      <h3>Painel Admin</h3>
+      <input type="text" id="admin-alvo" placeholder="Nome do usuário" />
+      <button onclick="banir()">Banir</button>
+      <button onclick="suspender()">Suspender 1 min</button>
+      <button onclick="adicionarAdmin()">Tornar Admin</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
