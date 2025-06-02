@@ -1,54 +1,109 @@
 let nomeUsuario = "";
-let mensagens = JSON.parse(localStorage.getItem("chatMensagens") || "[]");
+let mensagens = [];
+let nomesUsados = [];
+let admins = ["Rafael"]; // você é admin por padrão
+let banidos = [];
+let suspensoes = {};
 
-function confirmName() {
+function carregarPerfil() {
+  const perfil = JSON.parse(localStorage.getItem("perfilUsuario"));
+  if (perfil && !banidos.includes(perfil.nome)) {
+    if (suspensoes[perfil.nome] && Date.now() < suspensoes[perfil.nome]) {
+      alert("Você está suspenso temporariamente.");
+      return;
+    }
+
+    nomeUsuario = perfil.nome;
+    if (!nomesUsados.includes(nomeUsuario)) {
+      nomesUsados.push(nomeUsuario);
+    }
+
+    mostrarChat();
+  } else {
+    document.getElementById("name-page").style.display = "block";
+  }
+}
+
+function confirmarNome() {
   const nome = document.getElementById("username").value.trim();
-  const erro = document.getElementById("name-error");
 
   if (!nome) {
-    erro.textContent = "Digite um nome.";
+    document.getElementById("name-error").innerText = "Digite um nome.";
     return;
   }
 
-  let nomesAtivos = JSON.parse(localStorage.getItem("nomesAtivos") || "[]");
-
-  if (nomesAtivos.includes(nome)) {
-    erro.textContent = "Este nome já está em uso!";
+  if (nomesUsados.includes(nome) || banidos.includes(nome)) {
+    document.getElementById("name-error").innerText = "Nome já usado ou banido.";
     return;
   }
 
   nomeUsuario = nome;
-  nomesAtivos.push(nome);
-  localStorage.setItem("nomesAtivos", JSON.stringify(nomesAtivos));
+  nomesUsados.push(nome);
+  salvarPerfil(nome);
+  mostrarChat();
+}
 
+function mostrarChat() {
   document.getElementById("name-page").style.display = "none";
   document.getElementById("chat-page").style.display = "block";
-  document.getElementById("user-label").textContent = nomeUsuario;
+  document.getElementById("user-label").innerText = nomeUsuario;
+
+  if (admins.includes(nomeUsuario)) {
+    document.getElementById("admin-panel").style.display = "block";
+  }
 
   atualizarChat();
   setInterval(atualizarChat, 3000);
 }
 
-function enviarMensagem() {
-  const texto = document.getElementById("mensagem").value.trim();
-  if (texto === "") return;
+function salvarPerfil(nome) {
+  const perfil = { nome: nome };
+  localStorage.setItem("perfilUsuario", JSON.stringify(perfil));
+}
 
-  mensagens.push({ nome: nomeUsuario, texto });
-  localStorage.setItem("chatMensagens", JSON.stringify(mensagens));
+function enviarMensagem() {
+  const msg = document.getElementById("mensagem").value.trim();
+  if (!msg) return;
+
+  mensagens.push({ nome: nomeUsuario, texto: msg });
   document.getElementById("mensagem").value = "";
   atualizarChat();
 }
 
 function atualizarChat() {
-  const chatBox = document.getElementById("chat-box");
-  chatBox.innerHTML = mensagens.map(m =>
-    `<p><strong>${m.nome}:</strong> ${m.texto}</p>`
-  ).join("");
-  chatBox.scrollTop = chatBox.scrollHeight;
+  const caixa = document.getElementById("chat-box");
+  caixa.innerHTML = "";
+  mensagens.forEach(m => {
+    const p = document.createElement("p");
+    p.innerHTML = `<strong>${m.nome}:</strong> ${m.texto}`;
+    caixa.appendChild(p);
+  });
+  caixa.scrollTop = caixa.scrollHeight;
 }
 
-window.addEventListener("beforeunload", () => {
-  let nomesAtivos = JSON.parse(localStorage.getItem("nomesAtivos") || "[]");
-  nomesAtivos = nomesAtivos.filter(n => n !== nomeUsuario);
-  localStorage.setItem("nomesAtivos", JSON.stringify(nomesAtivos));
-});
+// ADMIN: Banir
+function banirNome() {
+  const alvo = document.getElementById("alvo").value.trim();
+  if (alvo && !banidos.includes(alvo)) {
+    banidos.push(alvo);
+    alert(`${alvo} foi banido.`);
+  }
+}
+
+// ADMIN: Suspender por 1 minuto
+function suspenderNome() {
+  const alvo = document.getElementById("alvo").value.trim();
+  if (alvo) {
+    suspensoes[alvo] = Date.now() + 60000;
+    alert(`${alvo} está suspenso por 1 minuto.`);
+  }
+}
+
+// ADMIN: Adicionar novo admin
+function adicionarAdmin() {
+  const alvo = document.getElementById("alvo").value.trim();
+  if (alvo && !admins.includes(alvo)) {
+    admins.push(alvo);
+    alert(`${alvo} agora é admin.`);
+  }
+}
