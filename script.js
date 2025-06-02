@@ -3,25 +3,28 @@ let nomesUsados = [];
 let mensagens = [];
 let banidos = [];
 let suspensos = [];
-let admins = ["rafael"]; // Só você é admin por padrão
+let admins = ["rafael"]; // Altere aqui seu nome de admin
 
 function fazerLogin() {
   const senha = document.getElementById("senha").value;
-  if (senha === "1234") {
-    document.getElementById("login-page").style.display = "none";
-    document.getElementById("name-page").style.display = "block";
-  } else {
-    document.getElementById("login-error").textContent = "Senha incorreta!";
+  if (!senha) {
+    document.getElementById("login-error").textContent = "Digite uma senha.";
+    return;
   }
+
+  localStorage.setItem("senha", senha);
+  document.getElementById("login-page").style.display = "none";
+  document.getElementById("name-page").style.display = "block";
 }
 
 function confirmName() {
   const nome = document.getElementById("username").value.trim();
+  const senha = localStorage.getItem("senha") || "";
   const agora = Date.now();
 
   const suspensao = suspensos.find(u => u.nome === nome);
   if (suspensao && agora < suspensao.fim) {
-    document.getElementById("name-error").textContent = `Usuário suspenso por ${Math.ceil((suspensao.fim - agora) / 60000)} min.`;
+    document.getElementById("name-error").textContent = `Suspenso por ${Math.ceil((suspensao.fim - agora) / 60000)} min.`;
     return;
   }
 
@@ -35,9 +38,18 @@ function confirmName() {
     return;
   }
 
+  let contas = JSON.parse(localStorage.getItem("contas") || "{}");
+  if (contas[nome] && contas[nome] !== senha) {
+    document.getElementById("name-error").textContent = "Senha incorreta para este nome!";
+    return;
+  }
+
+  contas[nome] = senha;
+  localStorage.setItem("contas", JSON.stringify(contas));
+
   let ativos = JSON.parse(localStorage.getItem("usuariosAtivos") || "[]");
   if (ativos.includes(nome)) {
-    document.getElementById("name-error").textContent = "Nome já está sendo utilizado!";
+    document.getElementById("name-error").textContent = "Nome já está em uso!";
     return;
   }
 
