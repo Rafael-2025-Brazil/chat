@@ -1,53 +1,54 @@
 let nomeUsuario = "";
-let mensagens = [];
+let mensagens = JSON.parse(localStorage.getItem("chatMensagens") || "[]");
 
 function confirmName() {
   const nome = document.getElementById("username").value.trim();
+  const erro = document.getElementById("name-error");
+
   if (!nome) {
-    document.getElementById("name-error").textContent = "Digite um nome.";
+    erro.textContent = "Digite um nome.";
     return;
   }
 
-  let ativos = JSON.parse(localStorage.getItem("usuariosAtivos") || "[]");
+  let nomesAtivos = JSON.parse(localStorage.getItem("nomesAtivos") || "[]");
 
-  if (ativos.includes(nome)) {
-    document.getElementById("name-error").textContent = "Nome já está em uso!";
+  if (nomesAtivos.includes(nome)) {
+    erro.textContent = "Este nome já está em uso!";
     return;
   }
 
   nomeUsuario = nome;
-  ativos.push(nome);
-  localStorage.setItem("usuariosAtivos", JSON.stringify(ativos));
+  nomesAtivos.push(nome);
+  localStorage.setItem("nomesAtivos", JSON.stringify(nomesAtivos));
 
   document.getElementById("name-page").style.display = "none";
   document.getElementById("chat-page").style.display = "block";
   document.getElementById("user-label").textContent = nomeUsuario;
 
   atualizarChat();
-  setInterval(atualizarChat, 5000);
+  setInterval(atualizarChat, 3000);
 }
 
 function enviarMensagem() {
-  const msg = document.getElementById("mensagem").value.trim();
-  if (msg !== "") {
-    mensagens.push({ nome: nomeUsuario, texto: msg });
-    document.getElementById("mensagem").value = "";
-    atualizarChat();
-  }
+  const texto = document.getElementById("mensagem").value.trim();
+  if (texto === "") return;
+
+  mensagens.push({ nome: nomeUsuario, texto });
+  localStorage.setItem("chatMensagens", JSON.stringify(mensagens));
+  document.getElementById("mensagem").value = "";
+  atualizarChat();
 }
 
 function atualizarChat() {
-  const box = document.getElementById("chat-box");
-  box.innerHTML = mensagens.map(m => `<p><strong>${m.nome}:</strong> ${m.texto}</p>`).join("");
-  box.scrollTop = box.scrollHeight;
+  const chatBox = document.getElementById("chat-box");
+  chatBox.innerHTML = mensagens.map(m =>
+    `<p><strong>${m.nome}:</strong> ${m.texto}</p>`
+  ).join("");
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-window.addEventListener("load", () => {
-  document.getElementById("name-page").style.display = "block";
-});
-
 window.addEventListener("beforeunload", () => {
-  let ativos = JSON.parse(localStorage.getItem("usuariosAtivos") || "[]");
-  ativos = ativos.filter(n => n !== nomeUsuario);
-  localStorage.setItem("usuariosAtivos", JSON.stringify(ativos));
+  let nomesAtivos = JSON.parse(localStorage.getItem("nomesAtivos") || "[]");
+  nomesAtivos = nomesAtivos.filter(n => n !== nomeUsuario);
+  localStorage.setItem("nomesAtivos", JSON.stringify(nomesAtivos));
 });
