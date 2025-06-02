@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chat Simples</title>
+  <title>Chat do Rafael</title>
   <style>
     body {
-      font-family: sans-serif;
       margin: 0;
       padding: 0;
+      font-family: Arial, sans-serif;
       background: #111;
       color: #fff;
     }
-    #name-page, #chat-page {
+    #login, #chat {
       display: none;
       padding: 20px;
     }
@@ -26,111 +26,93 @@
     }
     input, button {
       padding: 10px;
-      margin-top: 10px;
       font-size: 16px;
       border-radius: 5px;
-      border: none;
-    }
-    input {
-      width: 80%;
+      margin-top: 10px;
     }
     button {
-      background-color: #2ecc71;
-      color: #fff;
+      background: #2ecc71;
+      color: white;
+      border: none;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #27ae60;
-    }
     #admin-panel {
-      margin-top: 30px;
+      margin-top: 20px;
       background: #333;
       padding: 10px;
       border-radius: 5px;
     }
+    #admin-panel h3 {
+      margin-top: 0;
+    }
   </style>
 </head>
-<body onload="carregarPerfil()">
-
-  <!-- Página de login -->
-  <div id="name-page">
-    <h2>Digite seu nome para entrar no chat</h2>
-    <input type="text" id="username" placeholder="Seu nome" />
-    <button onclick="confirmarNome()">Entrar</button>
-    <p id="name-error" style="color: red;"></p>
+<body>
+  <div id="login">
+    <h2>Digite um nome de usuário:</h2>
+    <input id="nome" placeholder="Ex: Rafael123" />
+    <button onclick="entrar()">Entrar</button>
+    <p id="erro" style="color:red;"></p>
   </div>
 
-  <!-- Página do chat -->
-  <div id="chat-page">
-    <h2>Olá, <span id="user-label"></span>!</h2>
+  <div id="chat">
+    <h2>Bem-vindo, <span id="nome-usuario"></span></h2>
     <div id="chat-box"></div>
-    <input type="text" id="mensagem" placeholder="Digite uma mensagem" />
-    <button onclick="enviarMensagem()">Enviar</button>
+    <input id="mensagem" placeholder="Digite sua mensagem..." />
+    <button onclick="enviar()">Enviar</button>
 
-    <!-- Painel Admin -->
-    <div id="admin-panel" style="display:none;">
-      <h3>🛠 Painel Admin</h3>
-      <input type="text" id="alvo" placeholder="Nome para ação" />
-      <button onclick="banirNome()">Banir</button>
-      <button onclick="suspenderNome()">Suspender (1 min)</button>
-      <button onclick="adicionarAdmin()">Tornar Admin</button>
+    <div id="admin-panel" style="display: none;">
+      <h3>Painel Admin</h3>
+      <input id="alvo" placeholder="Nome para ban/susp/admin" />
+      <button onclick="banir()">Banir</button>
+      <button onclick="suspender()">Suspender (1min)</button>
+      <button onclick="promover()">Tornar Admin</button>
     </div>
   </div>
 
   <script>
-    let nomeUsuario = "";
+    let nome = "";
     let mensagens = [];
     let nomesUsados = [];
-    let admins = ["Rafael"]; // você é admin por padrão
+    let admins = ["Rafael"];
     let banidos = [];
-    let suspensoes = {};
+    let suspensos = {};
 
-    function carregarPerfil() {
-      try {
-        const perfil = JSON.parse(localStorage.getItem("perfilUsuario"));
-        if (perfil && !banidos.includes(perfil.nome)) {
-          if (suspensoes[perfil.nome] && Date.now() < suspensoes[perfil.nome]) {
-            alert("Você está suspenso temporariamente.");
-            return;
-          }
-          nomeUsuario = perfil.nome;
-          if (!nomesUsados.includes(nomeUsuario)) {
-            nomesUsados.push(nomeUsuario);
-          }
-          mostrarChat();
-        } else {
-          document.getElementById("name-page").style.display = "block";
-        }
-      } catch (e) {
-        document.getElementById("name-page").style.display = "block";
-      }
-    }
+    window.onload = () => {
+      document.getElementById("login").style.display = "block";
+    };
 
-    function confirmarNome() {
-      const nome = document.getElementById("username").value.trim();
+    function entrar() {
+      const entrada = document.getElementById("nome").value.trim();
 
-      if (!nome) {
-        document.getElementById("name-error").innerText = "Digite um nome.";
+      if (!entrada) {
+        document.getElementById("erro").innerText = "Digite um nome.";
         return;
       }
 
-      if (nomesUsados.includes(nome) || banidos.includes(nome)) {
-        document.getElementById("name-error").innerText = "Nome já usado ou banido.";
+      if (nomesUsados.includes(entrada)) {
+        document.getElementById("erro").innerText = "Nome já em uso.";
         return;
       }
 
-      nomeUsuario = nome;
+      if (banidos.includes(entrada)) {
+        document.getElementById("erro").innerText = "Você está banido.";
+        return;
+      }
+
+      if (suspensos[entrada] && Date.now() < suspensos[entrada]) {
+        const tempoRestante = Math.ceil((suspensos[entrada] - Date.now()) / 1000);
+        document.getElementById("erro").innerText = `Você está suspenso por mais ${tempoRestante}s.`;
+        return;
+      }
+
+      nome = entrada;
       nomesUsados.push(nome);
-      salvarPerfil(nome);
-      mostrarChat();
-    }
+      document.getElementById("login").style.display = "none";
+      document.getElementById("chat").style.display = "block";
+      document.getElementById("nome-usuario").innerText = nome;
 
-    function mostrarChat() {
-      document.getElementById("name-page").style.display = "none";
-      document.getElementById("chat-page").style.display = "block";
-      document.getElementById("user-label").innerText = nomeUsuario;
-
-      if (admins.includes(nomeUsuario)) {
+      if (admins.includes(nome)) {
         document.getElementById("admin-panel").style.display = "block";
       }
 
@@ -138,32 +120,26 @@
       setInterval(atualizarChat, 3000);
     }
 
-    function salvarPerfil(nome) {
-      const perfil = { nome: nome };
-      localStorage.setItem("perfilUsuario", JSON.stringify(perfil));
-    }
-
-    function enviarMensagem() {
+    function enviar() {
       const msg = document.getElementById("mensagem").value.trim();
       if (!msg) return;
-
-      mensagens.push({ nome: nomeUsuario, texto: msg });
+      mensagens.push({ nome: nome, texto: msg });
       document.getElementById("mensagem").value = "";
       atualizarChat();
     }
 
     function atualizarChat() {
-      const caixa = document.getElementById("chat-box");
-      caixa.innerHTML = "";
+      const box = document.getElementById("chat-box");
+      box.innerHTML = "";
       mensagens.forEach(m => {
         const p = document.createElement("p");
         p.innerHTML = `<strong>${m.nome}:</strong> ${m.texto}`;
-        caixa.appendChild(p);
+        box.appendChild(p);
       });
-      caixa.scrollTop = caixa.scrollHeight;
+      box.scrollTop = box.scrollHeight;
     }
 
-    function banirNome() {
+    function banir() {
       const alvo = document.getElementById("alvo").value.trim();
       if (alvo && !banidos.includes(alvo)) {
         banidos.push(alvo);
@@ -171,15 +147,15 @@
       }
     }
 
-    function suspenderNome() {
+    function suspender() {
       const alvo = document.getElementById("alvo").value.trim();
       if (alvo) {
-        suspensoes[alvo] = Date.now() + 60000;
-        alert(`${alvo} está suspenso por 1 minuto.`);
+        suspensos[alvo] = Date.now() + 60000;
+        alert(`${alvo} foi suspenso por 1 minuto.`);
       }
     }
 
-    function adicionarAdmin() {
+    function promover() {
       const alvo = document.getElementById("alvo").value.trim();
       if (alvo && !admins.includes(alvo)) {
         admins.push(alvo);
