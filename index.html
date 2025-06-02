@@ -5,24 +5,17 @@
   <title>Chat Simples</title>
   <style>
     body { font-family: Arial; margin: 0; padding: 20px; background: #111; color: white; }
-    #login-page, #name-page, #chat-page { display: none; }
+    #name-page, #chat-page { display: none; }
     input, button { padding: 10px; margin: 5px; }
     #chat-box { background: #222; height: 300px; overflow-y: auto; border: 1px solid #444; padding: 10px; }
-    #admin-panel { background: #333; padding: 10px; margin-top: 10px; border: 1px solid #555; }
   </style>
 </head>
 <body>
-  <div id="login-page">
-    <h2>Login</h2>
-    <input type="password" id="senha" placeholder="Sua senha" />
-    <button onclick="fazerLogin()">Entrar</button>
-    <p id="login-error" style="color: red;"></p>
-  </div>
 
   <div id="name-page">
     <h2>Digite seu nome</h2>
     <input type="text" id="username" />
-    <button onclick="confirmName()">Confirmar</button>
+    <button onclick="confirmName()">Entrar no Chat</button>
     <p id="name-error" style="color: red;"></p>
   </div>
 
@@ -31,14 +24,6 @@
     <div id="chat-box"></div>
     <input type="text" id="mensagem" placeholder="Digite sua mensagem" />
     <button onclick="enviarMensagem()">Enviar</button>
-
-    <div id="admin-panel" style="display: none;">
-      <h3>Administração</h3>
-      <input type="text" id="admin-alvo" placeholder="Nome do usuário" />
-      <button onclick="banir()">Banir</button>
-      <button onclick="suspender()">Suspender (1 min)</button>
-      <button onclick="adicionarAdmin()">Promover a admin</button>
-    </div>
   </div>
 
   <script src="script.js"></script>
